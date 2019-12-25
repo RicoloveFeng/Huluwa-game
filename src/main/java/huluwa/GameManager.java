@@ -6,10 +6,7 @@ import huluwa.exceptions.StrategyOutOfPosition;
 import huluwa.lands.Land;
 import huluwa.strategy.*;
 import huluwa.ui.drawEngine;
-import huluwa.utils.DrawRecord;
-import huluwa.utils.MoveRecord;
-import huluwa.utils.Position;
-import huluwa.utils.Utils;
+import huluwa.utils.*;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
@@ -70,17 +67,17 @@ public class GameManager {
             lenPCS = new PropertyChangeSupport(this);
         }
 
-        public void joinQueue(ICreature creature){
+        public void joinQueue(ICreature creature) {
             queue[queueLen++] = creature;
-            lenPCS.firePropertyChange("queueFull",queueLen - 1,queueLen);
+            lenPCS.firePropertyChange("queueFull", queueLen - 1, queueLen);
         }
 
-        public void cleanQueue(){
+        public void cleanQueue() {
             Arrays.fill(queue, null);
             queueLen = 0;
         }
 
-        public boolean isNull(){
+        public boolean isNull() {
             return queueLen == 0;
         }
     }
@@ -102,6 +99,7 @@ public class GameManager {
         IStrategy ret = null;
         try {
             ret = strategies.get(random.nextInt(strategies.size())).getClass().newInstance();
+            Log(ret.getClass().getName());
         } catch (IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
             System.exit(-1);
@@ -228,7 +226,7 @@ public class GameManager {
         } else {
             dest = path.get(min(path.size() - 1, mr.max));
         }
-        Position ori = new Position(mover.getPosition().col(),mover.getPosition().row());
+        Position ori = new Position(mover.getPosition().col(), mover.getPosition().row());
         try {
             mover.moveTo(dest.col(), dest.row());
         } catch (MoveToOutsideOfField moveToOutsideOfField) {
@@ -237,27 +235,26 @@ public class GameManager {
         return new MoveRecord(mover, mover, ori, dest, MOVE.MOVE);
     }
 
-    private ArrayList<MoveRecord> generateProcess(){
+    private ArrayList<MoveRecord> generateProcess() {
         ArrayList<MoveRecord> ret = new ArrayList<>();
         for (ICreature creature : pq.queue) {
             // see whether you are fighter or cheerleader
             if (creature.isAlive()) {
                 // first move the character
                 Position targetPosition;
-                if (creature instanceof Cheerleader) {
-                    if (creature instanceof Grandpa) {
+                if (!creature.isAttackable()) {
+                    if (huluwa.contains(creature)) {
                         targetPosition = huluwa.bestCheerPosition(bf);
                     } else { // if Basilisk
                         targetPosition = badguy.bestCheerPosition(bf);
                     }
-                }
-                else { // if instance of Fighter
+                } else { // if instance of Fighter
                     // if no one to fight, game ends.
                     if (badguy.getAliveMembers().size() == 0 || huluwa.getAliveMembers().size() == 0) break;
 
                     // pick nearest enemy
-                    Fighter fighter = (Fighter) creature;
-                    if (creature instanceof Huluwa) {
+                    IFighter fighter = (IFighter) creature;
+                    if (huluwa.contains(creature)) {
                         fighter.setTarget(badguy.getNearsetMember(creature.getPosition()));
                     } else {
                         fighter.setTarget(huluwa.getNearsetMember(creature.getPosition()));
@@ -273,38 +270,37 @@ public class GameManager {
                 ret.add(moveCreature(creature, path));
 
                 //try to perform operation
-                if(creature instanceof Fighter){
-                    Fighter fighter = (Fighter) creature;
+                if (creature.isAttackable()) {
+                    IFighter fighter = (IFighter) creature;
                     // see if target in attack range
                     if (fighter.getAttackRange().inRange(Position.distance(creature.getPosition(), targetPosition))) {
                         // get personal ad and land buff
                         int damage = fighter.getAttackDamage() + bf.getLand(creature.getPosition()).attackBuff();
                         //try get cheer buff
-                        Cheerleader cheerleader = null;
-                        if(huluwa.contains(creature) &&
-                        huluwa.getCheerleader().isAlive()){
+                        ICheerleader cheerleader = null;
+                        if (huluwa.contains(creature) &&
+                                huluwa.getCheerleader().isAlive()) {
                             cheerleader = huluwa.getCheerleader();
 
-                        }
-                        else if(badguy.contains(creature) && badguy.getCheerleader().isAlive()){
+                        } else if (badguy.contains(creature) && badguy.getCheerleader().isAlive()) {
                             cheerleader = badguy.getCheerleader();
 
                         }
-                        if(cheerleader != null && cheerleader.getCheerRange().inRange(Position.distance(cheerleader.getPosition(), creature.getPosition()))){
+                        if (cheerleader != null && cheerleader.getCheerRange().inRange(Position.distance(cheerleader.getPosition(), creature.getPosition()))) {
                             damage += cheerleader.attackBuff();
                         }
                         // roll for miss
-                        if(random.nextDouble() <= fighter.getTarget().getMissRate()){
+                        if (random.nextDouble() <= fighter.getTarget().getMissRate()) {
                             ret.add(new MoveRecord(creature, fighter.getTarget(), creature.getPosition(), fighter.getTarget().getPosition(), MOVE.MISS));
-                        }else{
+                        } else {
                             fighter.getTarget().takeDamage(damage);
                             ret.add(new MoveRecord(creature, fighter.getTarget(), creature.getPosition(), fighter.getTarget().getPosition(), MOVE.ATTACK));
                         }
                     }
 
-                    if(!fighter.getTarget().isAlive()){
+                    if (!fighter.getTarget().isAlive()) {
                         Position tpos = fighter.getTarget().getPosition();
-                        ret.add(new MoveRecord(fighter.getTarget(),fighter.getTarget(),tpos,tpos,MOVE.DECADE));
+                        ret.add(new MoveRecord(fighter.getTarget(), fighter.getTarget(), tpos, tpos, MOVE.DECADE));
                     }
                 }
             }
@@ -318,7 +314,7 @@ public class GameManager {
         s = scene;
         de = new drawEngine(gc, s, timestamp, isReplay);
         gc.setFill(Color.WHITE);
-        gc.fillRect(0,0,SCENE_WIDTH,SCENE_HEIGHT);
+        gc.fillRect(0, 0, SCENE_WIDTH, SCENE_HEIGHT);
     }
 
     void ready() {
@@ -340,37 +336,52 @@ public class GameManager {
         creatureCount = huluwa.getMemberSize() + badguy.getMemberSize();
 
         pq.initQueue(creatureCount);
-        for(ICreature guy: huluwa){
+        for (ICreature guy : huluwa) {
             guy.setProcessQueue(pq);
         }
-        for(ICreature guy: badguy){
+        for (ICreature guy : badguy) {
             guy.setProcessQueue(pq);
         }
 
         de.initScene(bf, huluwa, badguy);
     }
-    void play(){
+
+    void play() {
         pq.isRunning = true;
         waitingKey = false;
 
+        ArrayList<Thread> toStart = new ArrayList<>();
+
         for (ICreature guy : huluwa) {
-            new Thread(guy).start();
+            toStart.add(new Thread(guy));
         }
         for (ICreature guy : badguy) {
-            new Thread(guy).start();
+            toStart.add(new Thread(guy));
+        }
+
+        while (true) {
+            Log("invoking");
+            boolean allAlive = true;
+            for (Thread th : toStart) {
+                if (!th.isAlive()) {
+                    th.start();
+                    allAlive = false;
+                }
+            }
+            if (allAlive) break;
         }
 
         Log("Thread start all");
 
         pq.lenPCS.addPropertyChangeListener(evt -> {
-            if((int)evt.getNewValue() == creatureCount){
-                Log("processing");
+            if ((int) evt.getNewValue() == creatureCount) {
+                //Log("processing");
 
                 // generate all moves
                 ArrayList<MoveRecord> records = generateProcess();
 
                 // pass moves to ui module
-                for(MoveRecord rec:records){
+                for (MoveRecord rec : records) {
                     de.drawPCS.firePropertyChange("rec", null, rec);
                     try {
                         Thread.sleep(50);
@@ -382,9 +393,9 @@ public class GameManager {
                 // round ends
                 pq.cleanQueue();
                 round++;
-                Log("-----"+round+"-----");
+                //Log("-----"+round+"-----");
                 // if limit reached or all team members die
-                if(round == 50 || huluwa.getAliveMembers().size() == 0 || badguy.getAliveMembers().size() == 0){
+                if (round == 50 || huluwa.getAliveMembers().size() == 0 || badguy.getAliveMembers().size() == 0) {
                     // shutdown game
                     pq.isRunning = false;
                     waitingKey = true;
@@ -400,16 +411,16 @@ public class GameManager {
         });
     }
 
-    private ArrayList<DrawRecord> getReplayBatch(){
+    private ArrayList<DrawRecord> getReplayBatch() {
         ArrayList<DrawRecord> ret = new ArrayList<>();
-        if(index == drs.size()) {
+        if (index == drs.size()) {
             Log("trying stop");
             replayTimeline.stop();
             isGaming = false;
             waitingKey = true;
             return null;
         }
-        while(index < drs.size() && drs.get(index).order == orderCount){
+        while (index < drs.size() && drs.get(index).order == orderCount) {
             ret.add(drs.get(index));
             index++;
         }
@@ -425,14 +436,12 @@ public class GameManager {
         orderCount = 0;
         try {
             reader = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
-            while(true){
-                drs.add((DrawRecord)reader.readObject());
+            while (true) {
+                drs.add((DrawRecord) reader.readObject());
             }
-        }
-        catch (EOFException e){
+        } catch (EOFException e) {
             Log("read done");
-        }
-        catch (IOException | ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         orderCount = 0;
@@ -441,10 +450,10 @@ public class GameManager {
                 new KeyFrame(Duration.millis(0),
                         event -> {
                             ArrayList<DrawRecord> batch = getReplayBatch();
-                            if(batch != null){
-                                for(DrawRecord rec: batch){
+                            if (batch != null) {
+                                for (DrawRecord rec : batch) {
                                     try {
-                                        de.drawPic(rec.src,rec.x,rec.y,false);
+                                        de.drawPic(rec.src, rec.x, rec.y, false);
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
@@ -457,8 +466,8 @@ public class GameManager {
         replayTimeline.play();
     }
 
-    void end(){
+    void end() {
         waitingKey = false;
-        gc.drawImage(new Image(this.getClass().getClassLoader().getResource("Main.png").toString()),0,0);
+        gc.drawImage(new Image(this.getClass().getClassLoader().getResource("Main.png").toString()), 0, 0);
     }
 }

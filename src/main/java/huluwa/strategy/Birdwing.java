@@ -5,7 +5,7 @@ import huluwa.utils.Position;
 import java.util.ArrayList;
 
 public class Birdwing extends Strategy {
-    public Birdwing(){
+    public Birdwing() {
         posCount = 0;
         positions = new ArrayList<Position>();
         /*new Pos(0, 0),

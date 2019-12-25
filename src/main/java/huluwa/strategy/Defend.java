@@ -5,7 +5,7 @@ import huluwa.utils.Position;
 import java.util.ArrayList;
 
 public class Defend extends Strategy {
-    public Defend(){
+    public Defend() {
         posCount = 0;
         positions = new ArrayList<Position>();
         /*                    new Pos(0, 0),

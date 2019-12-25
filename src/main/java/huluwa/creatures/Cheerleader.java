@@ -1,8 +1,27 @@
 package huluwa.creatures;
 
-import huluwa.Range;
+import huluwa.utils.Range;
 
-public interface Cheerleader extends ICreature{
-    Range getCheerRange();
-    int attackBuff();
+public abstract class Cheerleader extends Creature implements ICheerleader {
+    Range cheerRange;
+    int buff;
+
+    @Override
+    public Range getCheerRange() {
+        return cheerRange;
+    }
+
+    @Override
+    public int attackBuff() {
+        return buff;
+    }
+
+    @Override
+    public boolean isAttackable() {
+        return false;
+    }
+
+    //public int attackBuff() {
+    //    return buff;
+    //}
 }

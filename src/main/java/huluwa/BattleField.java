@@ -25,14 +25,14 @@ public class BattleField {
     public static Lock lock;
     public static CountDownLatch cdl;
 
-    public Land getLand(int col, int row){
+    public Land getLand(int col, int row) {
         if (0 <= col && col < height && 0 <= row && row < width)
             return field[col][row];
         else
             return null;
     }
 
-    public Land getLand(Position pos){
+    public Land getLand(Position pos) {
         return getLand(pos.col(), pos.row());
     }
 
@@ -41,22 +41,18 @@ public class BattleField {
         field = new Land[height][width];
         for (int i = 0; i < height; i += 1) {
             for (int j = 0; j < width; j += 1) {
-                if(5<j&&j<12){
+                if (5 < j && j < 12) {
                     double roll = random.nextDouble();
-                    if(roll < 0.04){
+                    if (roll < 0.04) {
                         field[i][j] = new Rock();
-                    }
-                    else if(0.04 <= roll && roll < 0.14){
+                    } else if (0.04 <= roll && roll < 0.14) {
                         field[i][j] = new Water();
-                    }
-                    else if(0.14 <= roll && roll < 0.29){
+                    } else if (0.14 <= roll && roll < 0.29) {
                         field[i][j] = new Dirt();
-                    }
-                    else {
+                    } else {
                         field[i][j] = new Plain();
                     }
-                }
-                else {
+                } else {
                     field[i][j] = new Plain();
                 }
             }

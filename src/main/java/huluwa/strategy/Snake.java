@@ -5,7 +5,7 @@ import huluwa.utils.Position;
 import java.util.ArrayList;
 
 public class Snake extends Strategy {
-    public Snake(){
+    public Snake() {
         posCount = 0;
         positions = new ArrayList<Position>();
         positions.add(new Position(0, 0));

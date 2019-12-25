@@ -1,23 +1,20 @@
 package huluwa.creatures;
 
-import huluwa.BattleField;
-import huluwa.GameManager;
 import huluwa.GameManager.ProcessQueue;
-import huluwa.Range;
+import huluwa.utils.Range;
 import huluwa.exceptions.MoveToOutsideOfField;
 import huluwa.utils.Position;
 
-import java.util.Arrays;
-
 import static huluwa.utils.Utils.*;
 
-public class Creature implements ICreature {
+public abstract class Creature implements ICreature {
     String id;
     int hp;
     Range moveRange;
     Position position;
     double miss;
     ProcessQueue pq;
+
     public String getIdentifier() {
         return id;
     }
@@ -28,7 +25,7 @@ public class Creature implements ICreature {
 
     public void takeDamage(int d) {
         hp -= d;
-        if(hp<0) hp = 0;
+        if (hp < 0) hp = 0;
     }
 
     public Range getMoveRange() {
@@ -44,16 +41,16 @@ public class Creature implements ICreature {
     }
 
     public void moveTo(int col, int row) throws MoveToOutsideOfField {
-        if(0<= col && col < GRID_HEIGHT && 0 <= row && row < GRID_WIDTH)
-            position.setPos(col,row);
-        else throw new MoveToOutsideOfField("->"+col+" "+row);
+        if (0 <= col && col < GRID_HEIGHT && 0 <= row && row < GRID_WIDTH)
+            position.setPos(col, row);
+        else throw new MoveToOutsideOfField("->" + col + " " + row);
     }
 
-    public boolean isAlive(){
-        return hp>0;
+    public boolean isAlive() {
+        return hp > 0;
     }
 
-    public void setProcessQueue(ProcessQueue processQueue){
+    public void setProcessQueue(ProcessQueue processQueue) {
         pq = processQueue;
     }
 
@@ -68,16 +65,16 @@ public class Creature implements ICreature {
     }
 
     public void run() {
-        //Log(id+" is running");
-        while(true){
-            synchronized (pq){
-                if(!pq.isRunning) {
+        Log(id + " is running");
+        while (true) {
+            synchronized (pq) {
+                if (!pq.isRunning) {
                     //Log(id+" is stopping");
                     break;
                 }
                 try {
                     //Log(id+" is joining");
-                    if(pq.isNull()) pq.notify();
+                    if (pq.isNull()) pq.notify();
                     pq.joinQueue(this);
                     pq.wait();
                 } catch (InterruptedException e) {
@@ -85,6 +82,6 @@ public class Creature implements ICreature {
                 }
             }
         }
-        Log(id +" is closing");
+        //Log(id +" is closing");
     }
 }

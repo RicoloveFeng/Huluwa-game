@@ -55,7 +55,7 @@ public class GUIMain extends Application {
         Scene s = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT);
         //Log(this.getClass().getClassLoader().getResource("Main.png").toString());
         //gc.drawImage(new Image(this.getClass().getResource("Main.png").toString()), 0, 0);
-        gc.drawImage(new Image(this.getClass().getClassLoader().getResource("Main.png").toString()),0,0);
+        gc.drawImage(new Image(this.getClass().getClassLoader().getResource("Main.png").toString()), 0, 0);
 
         primaryStage.setTitle("正版葫芦娃自走棋");
         primaryStage.getIcons().add(new Image(this.getClass().getClassLoader().getResource("Template.png").toString()));
@@ -114,7 +114,7 @@ public class GUIMain extends Application {
                     // draw box line
                     int x = (int) event.getX();
                     int y = (int) event.getY();
-                    gc.drawImage(new Image(this.getClass().getClassLoader().getResource("Main.png").toString()),0,0);
+                    gc.drawImage(new Image(this.getClass().getClassLoader().getResource("Main.png").toString()), 0, 0);
                     gc.setStroke(Color.YELLOW);
                     MENU_STATE newState = getState(x, y);
                     if (newState == MENU_STATE.START) {

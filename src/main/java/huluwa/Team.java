@@ -1,6 +1,6 @@
 package huluwa;
 
-import huluwa.creatures.Cheerleader;
+import huluwa.creatures.ICheerleader;
 import huluwa.creatures.ICreature;
 import huluwa.utils.Position;
 import org.jetbrains.annotations.NotNull;
@@ -29,8 +29,8 @@ public class Team implements Iterable<ICreature> {
         return member.size() + ret;
     }
 
-    public Cheerleader getCheerleader() {
-        return (Cheerleader) cheerleader;
+    public ICheerleader getCheerleader() {
+        return (ICheerleader) cheerleader;
     }
 
     public boolean contains(ICreature creature) {
@@ -53,21 +53,21 @@ public class Team implements Iterable<ICreature> {
         }
         int maxHeat = -1;
         Position ret = null;
-        for (int i = 0;i<bf.height;i++){
-            for(int j=0;j<bf.width;j++){
-                if(planMap[i][j] > maxHeat && !bf.getLand(i,j).isBlocking()){
+        for (int i = 0; i < bf.height; i++) {
+            for (int j = 0; j < bf.width; j++) {
+                if (planMap[i][j] > maxHeat && !bf.getLand(i, j).isBlocking()) {
                     maxHeat = planMap[i][j];
-                    ret = new Position(i,j);
+                    ret = new Position(i, j);
                 }
             }
         }
         return ret;
     }
 
-    public ArrayList<ICreature> getAliveMembers(){
+    public ArrayList<ICreature> getAliveMembers() {
         ArrayList<ICreature> ret = new ArrayList<>();
-        for(ICreature guy: this){
-            if (guy.getHp() > 0){
+        for (ICreature guy : this) {
+            if (guy.getHp() > 0) {
                 ret.add(guy);
             }
         }
@@ -75,11 +75,11 @@ public class Team implements Iterable<ICreature> {
         return ret;
     }
 
-    public ICreature getNearsetMember(Position base){
+    public ICreature getNearsetMember(Position base) {
         int min_dis = LARGE_NUM;
         ICreature ret = null;
-        for(ICreature guy: this.getAliveMembers()){
-            if(Position.distance(base, guy.getPosition()) < min_dis){
+        for (ICreature guy : this.getAliveMembers()) {
+            if (Position.distance(base, guy.getPosition()) < min_dis) {
                 min_dis = Position.distance(base, guy.getPosition());
                 ret = guy;
             }
@@ -87,9 +87,9 @@ public class Team implements Iterable<ICreature> {
         return ret;
     }
 
-    public boolean isOccupying(Position pos){
-        for(ICreature guy: this){
-            if(guy.getPosition().equals(pos) && guy.isAlive()) return true;
+    public boolean isOccupying(Position pos) {
+        for (ICreature guy : this) {
+            if (guy.getPosition().equals(pos) && guy.isAlive()) return true;
         }
         return false;
     }

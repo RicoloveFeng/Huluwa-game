@@ -5,7 +5,7 @@ import huluwa.utils.Position;
 import java.util.ArrayList;
 
 public class Square extends Strategy {
-    public Square(){
+    public Square() {
         posCount = 0;
         positions = new ArrayList<Position>();
         positions.add(new Position(0, 0));

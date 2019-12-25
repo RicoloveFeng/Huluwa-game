@@ -1,10 +1,34 @@
 package huluwa.creatures;
 
-import huluwa.Range;
+import huluwa.utils.Range;
 
-public interface Fighter {
-    int getAttackDamage();
-    Range getAttackRange();
-    ICreature getTarget();
-    void setTarget(ICreature tg);
+public abstract class Fighter extends Creature implements IFighter {
+    int ad;
+    Range attackRange;
+    ICreature target;
+
+    @Override
+    public int getAttackDamage() {
+        return ad;
+    }
+
+    @Override
+    public Range getAttackRange() {
+        return attackRange;
+    }
+
+    @Override
+    public ICreature getTarget() {
+        return target;
+    }
+
+    @Override
+    public void setTarget(ICreature tg) {
+        target = tg;
+    }
+
+    @Override
+    public boolean isAttackable() {
+        return true;
+    }
 }
